@@ -1,7 +1,7 @@
 <input type="text" [(ngModel)]="inputValue">
 
-<button (click)="clearInput(); " class="operator">CE</button>
-<button (click)="character = '√x'; addCharacter();" class="operator">√x</button>
+<button (click)="character = '^'; addCharacter();" class="operator">^</button>
+<button (click)="character = '√'; addCharacter();" class="operator">√</button>
 <button (click)="character = '%'; addCharacter();" class="operator">%</button>
 <button (click)="character = '÷'; addCharacter();" class="operator">÷</button>
 
@@ -20,7 +20,11 @@
 <button (click)="character = '3'; addCharacter();" class="number">3</button>
 <button (click)="character = '+'; addCharacter();" class="operator">+</button>
 
+<button (click)="character = '('; addCharacter();" class="number">(</button>
 <button (click)="character = '0'; addCharacter();" class="number">0</button>
+<button (click)="character = ')'; addCharacter();" class="number">)</button>
+<button (click)="equal();" class="operator" id="equal">=</button>
+
+<button (click)="clearInput();" class="operator" id="CE">CE</button>
 <button (click)="character = '.'; addCharacter();" class="number">.</button>
 <button (click)="character = 'π'; addCharacter();" class="number">π</button>
-<button (click)="character = '='; addCharacter();" class="operator" id="equal">=</button>
