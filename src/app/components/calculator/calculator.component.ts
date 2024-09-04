@@ -47,12 +47,61 @@ export class CalculatorComponent {
     return {nextNumber, currentIndex};
   }
 
+  operationPriority(inputValueSegmented:string[], operatorsList:string[]) {
+
+    let arePrimaryOperationsDone:boolean = false;
+
+    while (arePrimaryOperationsDone == false){
+      arePrimaryOperationsDone = true; 
+
+      for (let i = 0; i < inputValueSegmented.length; i++){
+
+        if (operatorsList.includes(inputValueSegmented[i])){
+          
+          arePrimaryOperationsDone = false; 
+
+          const num1 = new BigNumber(inputValueSegmented[i - 1]);
+          const num2 = new BigNumber(inputValueSegmented[i + 1]);
+
+          let response:string = '';
+
+          switch (inputValueSegmented[i]) {
+            case '+':
+              response = num1.plus(num2).toString();
+              break
+            case '-':
+              response = num1.minus(num2).toString();
+              break
+            case '%':
+              response = num1.mod(num2).toString();
+              break
+            case '^':
+              response = num1.exponentiatedBy(num2).toString();
+              break
+            case '÷':
+              response = num1.dividedBy(num2).toString();
+              break
+            case '×':
+              response = num1.multipliedBy(num2).toString();
+              break
+          }
+
+          inputValueSegmented.splice(i - 1, 3, response);
+
+          i--;
+        }
+      }
+    }
+    return inputValueSegmented;
+  }
+
   equal() {
     let inputValueLenght:number = this.inputValue.length;
 
     let inputValueSegmented:string[] = [];
 
     let currentIndex:number = 0;
+
     while (currentIndex < inputValueLenght){
       let response = this.getNumber(currentIndex);
 
@@ -67,9 +116,6 @@ export class CalculatorComponent {
         response.nextNumber = num1.sqrt().toString();
       }
 
-      console.log(response.nextNumber);
-      
-
       currentIndex = response.currentIndex;
 
       inputValueSegmented.push(response.nextNumber);
@@ -78,94 +124,10 @@ export class CalculatorComponent {
       currentIndex++;
     }
 
-    let arePrimaryOperationsDone:boolean = false;
+    inputValueSegmented = this.operationPriority(inputValueSegmented, ['^'])
+    inputValueSegmented = this.operationPriority(inputValueSegmented, ['÷', '×', '%'])
+    inputValueSegmented = this.operationPriority(inputValueSegmented, ['+', '-'])
 
-    while (arePrimaryOperationsDone == false){
-      arePrimaryOperationsDone = true; 
-
-      for (let i = 0; inputValueSegmented[i] != undefined; i++){
-        if (inputValueSegmented[i] == '^'){
-
-          arePrimaryOperationsDone = false;
-
-          const num1 = new BigNumber(inputValueSegmented[i - 1]);
-          const num2 = new BigNumber(inputValueSegmented[i + 1]);
-
-          let response:string = num1.exponentiatedBy(num2).toString();
-
-          i++;
-
-          inputValueSegmented[i] = response;
-
-          inputValueSegmented.splice(i - 2, 2);
-        }
-      }
-    }
-
-    arePrimaryOperationsDone = false;
-
-    while (arePrimaryOperationsDone == false){
-      arePrimaryOperationsDone = true; 
-
-      for (let i = 0; inputValueSegmented[i] != undefined; i++){
-        if (inputValueSegmented[i] == '÷' || inputValueSegmented[i] == '%' || inputValueSegmented[i] == '×'){
-
-          arePrimaryOperationsDone = false;
-
-          const num1 = new BigNumber(inputValueSegmented[i - 1]);
-          const num2 = new BigNumber(inputValueSegmented[i + 1]);
-
-          let response:string;
-          
-          if (inputValueSegmented[i] == '÷') {
-            response = num1.dividedBy(num2).toString();
-          }
-          else if (inputValueSegmented[i] == '×') {
-            response = num1.multipliedBy(num2).toString();
-          }
-          else {
-            response = num1.mod(num2).toString();
-          }
-
-          i++;
-
-          inputValueSegmented[i] = response;
-
-          inputValueSegmented.splice(i - 2, 2);
-        }
-      }
-    }
-
-    arePrimaryOperationsDone = false;
-
-    while (arePrimaryOperationsDone == false){
-      arePrimaryOperationsDone = true; 
-
-      for (let i = 0; inputValueSegmented[i] != undefined; i++){
-        if (inputValueSegmented[i] == '+' || inputValueSegmented[i] == '-'){
-
-          arePrimaryOperationsDone = false;
-
-          const num1 = new BigNumber(inputValueSegmented[i - 1]);
-          const num2 = new BigNumber(inputValueSegmented[i + 1]);
-
-          let response:string;
-
-          if (inputValueSegmented[i] == '+') {
-            response = num1.plus(num2).toString();
-          }
-          else {
-            response = num1.minus(num2).toString();
-          }
-
-          i++;
-
-          inputValueSegmented[i] = response;
-
-          inputValueSegmented.splice(i - 2, 2);
-        }
-      }
-    }
     this.inputValue = inputValueSegmented[0];
   }
 
