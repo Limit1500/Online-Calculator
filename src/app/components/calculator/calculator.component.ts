@@ -2,19 +2,20 @@ import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { BigNumber } from 'bignumber.js';
+import { log } from 'node:console';
 
 @Component({
   selector: 'app-calculator',
   standalone: true,
   imports: [ CommonModule, FormsModule ],
   templateUrl: './calculator.component.html',
-  styleUrl: './calculator.component.css'
+  styleUrls: ['./calculator.component.css']
 })
 export class CalculatorComponent {
-  inputValue:string = "";
-  character:string = '';
+  inputValue: string = "";
+  character: string = '';
 
-  addCharacter():void {
+  addCharacter(): void {
     this.inputValue += this.character;
   }
 
@@ -22,113 +23,150 @@ export class CalculatorComponent {
     this.inputValue = '';
   }
 
-  getNumber(currentIndex:number):any {
+  getNumber(currentIndex: number, inputValue: string): any {
+    let nextNumber: string = '';
+    let isSqareRoot:boolean = false;
 
-    let nextNumber:string;
-
-    if (this.inputValue[currentIndex] == '√'){
+    if (inputValue[currentIndex] === '√' && inputValue[currentIndex + 1] !== '(') {
       nextNumber = '√';
       currentIndex++;
     }
-    else {
-      nextNumber = '';
-    }
-
-    if (this.inputValue[currentIndex] == 'π'){
-      currentIndex++;
-      nextNumber += '3.1415926535897932';
-      return {nextNumber, currentIndex};
-    }
-
-    while (this.inputValue[currentIndex] >= '.' && this.inputValue[currentIndex] <= '9' && this.inputValue[currentIndex] != '/'){
-      nextNumber += this.inputValue[currentIndex];
+    else if (inputValue[currentIndex] === '√') {
+      isSqareRoot = true;
       currentIndex++;
     }
-    return {nextNumber, currentIndex};
+
+    if (inputValue[currentIndex] === '(') {
+      let parenthesesParity = 1;
+      currentIndex++;
+
+      while (parenthesesParity !== 0 && currentIndex < inputValue.length) {
+        if (inputValue[currentIndex] === '(') {
+          parenthesesParity++;
+        } else if (inputValue[currentIndex] === ')') {
+          parenthesesParity--;
+        }
+
+        if (parenthesesParity !== 0) {
+          nextNumber += inputValue[currentIndex];
+        }
+
+        currentIndex++;
+      }
+
+      console.log(nextNumber);
+
+      nextNumber = this.performEquation(nextNumber);
+
+      if (isSqareRoot){
+        nextNumber = '√' + nextNumber;
+      }
+
+      console.log(nextNumber);
+
+      return { nextNumber, currentIndex: currentIndex - 1 };
+    }
+
+    if (inputValue[currentIndex] === 'π') {
+      nextNumber = '3.1415926535897932';
+      currentIndex++;
+      return { nextNumber, currentIndex };
+    }
+
+    while (currentIndex < inputValue.length &&
+      (inputValue[currentIndex] >= '0' && inputValue[currentIndex] <= '9' || inputValue[currentIndex] === '.')) {
+      nextNumber += inputValue[currentIndex];
+      currentIndex++;
+    }
+
+    return { nextNumber, currentIndex: currentIndex - 1 };
   }
 
-  operationPriority(inputValueSegmented:string[], operatorsList:string[]) {
+  operationPriority(inputValueSegmented: string[], operatorsList: string[]) {
+    let arePrimaryOperationsDone: boolean = false;
 
-    let arePrimaryOperationsDone:boolean = false;
+    while (!arePrimaryOperationsDone) {
+      arePrimaryOperationsDone = true;
 
-    while (arePrimaryOperationsDone == false){
-      arePrimaryOperationsDone = true; 
-
-      for (let i = 0; i < inputValueSegmented.length; i++){
-
-        if (operatorsList.includes(inputValueSegmented[i])){
-          
-          arePrimaryOperationsDone = false; 
+      for (let i = 0; i < inputValueSegmented.length; i++) {
+        if (operatorsList.includes(inputValueSegmented[i])) {
+          arePrimaryOperationsDone = false;
 
           const num1 = new BigNumber(inputValueSegmented[i - 1]);
           const num2 = new BigNumber(inputValueSegmented[i + 1]);
 
-          let response:string = '';
+          let response: string = '';
 
           switch (inputValueSegmented[i]) {
             case '+':
               response = num1.plus(num2).toString();
-              break
+              break;
             case '-':
               response = num1.minus(num2).toString();
-              break
+              break;
             case '%':
               response = num1.mod(num2).toString();
-              break
+              break;
             case '^':
               response = num1.exponentiatedBy(num2).toString();
-              break
+              break;
             case '÷':
               response = num1.dividedBy(num2).toString();
-              break
+              break;
             case '×':
               response = num1.multipliedBy(num2).toString();
-              break
+              break;
           }
 
           inputValueSegmented.splice(i - 1, 3, response);
-
           i--;
         }
       }
     }
+
     return inputValueSegmented;
   }
 
-  equal() {
-    let inputValueLenght:number = this.inputValue.length;
+  performEquation(inputValue: string): string {
+    let inputValueLength: number = inputValue.length;
+    let inputValueSegmented: string[] = [];
+    let currentIndex: number = 0;
 
-    let inputValueSegmented:string[] = [];
+    while (currentIndex < inputValueLength) {
+      let response = this.getNumber(currentIndex, inputValue);
 
-    let currentIndex:number = 0;
-
-    while (currentIndex < inputValueLenght){
-      let response = this.getNumber(currentIndex);
-
-      console.log(response.nextNumber);
-      
-      if (response.nextNumber[0] == '√'){
-
+      if (response.nextNumber[0] === '√') {
         response.nextNumber = response.nextNumber.slice(1);
-
         const num1 = new BigNumber(response.nextNumber);
-
         response.nextNumber = num1.sqrt().toString();
       }
 
       currentIndex = response.currentIndex;
 
       inputValueSegmented.push(response.nextNumber);
-      inputValueSegmented.push(this.inputValue[currentIndex]);
+
+      if (currentIndex + 1 < inputValue.length) {
+        currentIndex++;
+        const operator = inputValue[currentIndex];
+
+        if (['+', '-', '÷', '×', '%', '^'].includes(operator)) {
+          inputValueSegmented.push(operator);
+        }
+      }
 
       currentIndex++;
     }
 
-    inputValueSegmented = this.operationPriority(inputValueSegmented, ['^'])
-    inputValueSegmented = this.operationPriority(inputValueSegmented, ['÷', '×', '%'])
-    inputValueSegmented = this.operationPriority(inputValueSegmented, ['+', '-'])
+    console.log(inputValueSegmented);
 
-    this.inputValue = inputValueSegmented[0];
+    inputValueSegmented = this.operationPriority(inputValueSegmented, ['^']);
+    inputValueSegmented = this.operationPriority(inputValueSegmented, ['÷', '×', '%']);
+    inputValueSegmented = this.operationPriority(inputValueSegmented, ['+', '-']);
+    
+    return inputValueSegmented.length > 0 ? inputValueSegmented[0] : '0';
   }
 
+  equal() {
+      this.inputValue = this.performEquation(this.inputValue);
+  }
 }
