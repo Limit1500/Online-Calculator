@@ -1,0 +1,24 @@
+:host {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr 1fr;
+    grid-template-rows: 1fr 1fr 1fr 1fr 1fr 1fr 1fr;
+    max-width: 400px;
+    width: 100%;
+    height: 700px;
+    background-color: var(--primary-color);
+    justify-content: space-around;
+    gap: 1rem;
+    padding: 1rem;
+    border-radius: 20px;
+    box-shadow: 10px 10px 15px rgba(0, 0, 0, 0.5);
+}
+
+input {
+    grid-row: 1 / 2;
+    grid-column: 1 / 5;
+}
+
+#equal {
+    grid-row: 6 / 8;
+    grid-column: 4 / 5;
+}

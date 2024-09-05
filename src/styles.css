@@ -1,1 +1,57 @@
-/* You can add global styles to this file, and also import other style files */
+* {
+    margin: 0rem;
+    padding: 0rem;
+}
+
+:root {
+    --primary-color: #2b2d42;
+    --secunday-color: #445d88;
+    --tertiary-color: #edf2f4;
+}
+
+button {
+    font-size: 1.75em;
+    font-weight: bold;
+    box-sizing: border-box;
+    text-align: center;
+    border: 0px solid #CCCCCC;
+    border-radius: 8px;
+    transition: background-color 0.3s ease, transform 0.3s ease;
+    background-color: var(--secunday-color);
+    color: white;
+}
+
+button:hover {
+    background-color: #2ecc71;
+    transform: scale(1.1);
+}
+
+input {
+    border-radius: 8px;
+    border: 1px solid var(--secunday-color);
+    box-sizing: border-box;
+    background-color: var(--primary-color);
+    text-align: end;
+    font-size: 48px;
+    color: white;
+    outline: none;
+    padding: 5px;
+}
+
+input:not([type="image" i], [type="range" i], [type="checkbox" i], [type="radio" i]) {
+    overflow-clip-margin: 0px !important;
+    overflow: clip !important;
+}
+
+
+.operator {
+    background-color: coral;
+}
+
+#equal {
+    background-color: #2ecc71;
+}
+
+#CE {
+    background-color: rgb(219, 38, 38);
+}
