@@ -167,6 +167,21 @@ export class CalculatorComponent {
   }
 
   equal() {
-      this.inputValue = this.performEquation(this.inputValue);
+    try {
+      let response = this.performEquation(this.inputValue);
+      if (response === 'NaN' || response === '') {
+        throw new Error("Invalid input");
+      }
+      else {
+        this.inputValue = response;
+      }
+
+    }
+    catch (error) {
+      if (error instanceof Error) {
+        console.log(error.message);
+        this.inputValue = error.message;
+      }
+    }
   }
 }
